@@ -42,6 +42,9 @@ function moveToX (_x)
 		module.turnTo(3) -- east
 	elseif tps.pos.x > _x then
 		module.turnTo(1) -- west
+	else
+		-- no need to move
+		return true, nil
 	end
 	-- move
 	repeat
@@ -66,6 +69,9 @@ function moveToZ (_z)
 		module.turnTo(2) -- south
 	elseif tps.pos.z > _z then
 		module.turnTo(0) -- north
+	else
+		-- no need to move
+		return true, nil
 	end
 	-- move
 	repeat

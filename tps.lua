@@ -85,7 +85,7 @@ end
 --	boolean Whether the turtle could successfully turn.
 --	string | nil The reason the turtle could not turn.
 function module.turnRight ()
-	success, reason = turtle.forward()
+	success, reason = turtle.turnRight()
 	if success == true then
 		if module.dir == 0 then
 			module.dir = 3
