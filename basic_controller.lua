@@ -36,4 +36,24 @@ elseif verb == "locate" then
 
 	droneId = tonumber(args[2])
 	getLocation(droneId)
+elseif verb == "goto" then
+	if #args ~= 5 then
+		error("Usage: basic_controller goto <drone ID> <x> <y> <z>")
+	end
+
+	droneId = tonumber(args[2])
+	x = tonumber(args[3])
+	y = tonumber(args[4])
+	z = tonumber(args[5])
+
+	msgType, msgBody = controller.goTo(droneId, vector.new(x, y, z), nil)
+	if msgType == "drone_status" then
+		if msgBody == "Out of fuel" then
+			msgType, msgBody = controller.refuel(droneId)
+			if msgType == "drone_fuel" then
+				msgType, msgBody = controller.goTo(droneId, vector.new(x, y, z), nil)
+			end
+		end
+	end
+	print(msgType, textutils.serialize(msgBody))
 end

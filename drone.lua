@@ -9,7 +9,13 @@ function module.calibrate (name, protocol)
 	msg.open(protocol or "drone")
 	rednet.host(msg.protocol, name)
 
-	-- todo: check for fuel
+	-- check fuel level
+	if turtle.getFuelLevel() == 0 then
+		success, reason = turtle.refuel()
+		if not success then
+			error(reason)
+		end
+	end
 
 	-- setup gps
 	tps.calibrate()
