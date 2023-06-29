@@ -12,14 +12,14 @@ local dirs = { "north", "west", "south", "east" }
 
 local function getLocation (_drone)
 	msgType, msgBody = controller.getLocation(_drone)
-	print(string.format("Drone %d is located at (%d, %d, %d), facing %s", drone, msgBody.pos.x, msgBody.pos.y, msgBody.pos.z, dirs[msgBody.pos.dir]))
+	print(string.format("Drone %d is located at (%d, %d, %d), facing %s", _drone, msgBody.pos.x, msgBody.pos.y, msgBody.pos.z, dirs[msgBody.dir + 1]))
 end
 
 local function getDrones ()
 	drones = controller.drones()
 	for i, drone in ipairs(drones) do
 		msgType, msgBody = controller.getLocation(drone)
-		print(string.format("%d (%d, %d, %d) %s", drone, msgBody.pos.x, msgBody.pos.y, msgBody.pos.z, dirs[msgBody.pos.dir]))
+		print(string.format("%d (%d, %d, %d) %s", drone, msgBody.pos.x, msgBody.pos.y, msgBody.pos.z, dirs[msgBody.dir + 1]))
 	end
 end
 
