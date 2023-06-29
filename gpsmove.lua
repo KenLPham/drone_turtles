@@ -1,6 +1,6 @@
 -- ? https://pastebin.com/mWMv7rtr
 
-local module = { ... }
+local module = { }
 
 local tps = require("tps")
 
@@ -111,16 +111,16 @@ end
 -- Returns:
 --	boolean Whether the turtle could successfully move.
 --	string | nil The reason the turtle could not move.
-function module.goTo (x, y, z)
-	xSuccess, xReason = moveToX(x)
+function module.goToPos (_x, _y, _z)
+	xSuccess, xReason = moveToX(_x)
 	if not xSuccess then
 		return xSuccess, xReason
 	end
-	ySuccess, yReason = moveToY(y)
+	ySuccess, yReason = moveToY(_y)
 	if not ySuccess then
 		return ySuccess, yReason
 	end
-	zSuccess, zReason = moveToZ(z)
+	zSuccess, zReason = moveToZ(_z)
 	if not zSuccess then
 		return zSuccess, zReason
 	end
@@ -132,8 +132,8 @@ end
 -- Returns:
 --	boolean Whether the turtle could successfully move.
 --	string | nil The reason the turtle could not move.
-function module.goTo (vector)
-	return module.goTo(vector.x, vector.y, vector.z)
+function module.goTo (_vec)
+	return module.goToPos(_vec.x, _vec.y, _vec.z)
 end
 
 return module

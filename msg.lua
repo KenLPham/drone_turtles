@@ -2,7 +2,7 @@ local module = {
 	protocol = nil
 }
 
-function open(protocol)
+function module.open(protocol)
 	module.protocol = protocol
 
 	-- setup rednet
@@ -30,6 +30,6 @@ function module.broadcastOrSend (_type, _body, _recipient)
 	else
 		module.broadcast(_type, _body)
 	end
-
+end
 
 return module

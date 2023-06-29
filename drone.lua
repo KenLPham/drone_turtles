@@ -28,15 +28,14 @@ end
 
 -- send status messages (like out of fuel, stuck, etc)
 function module.sendStatusMessage(_msg)
-	module.broadcast("drone_status", _msg)
+	msg.broadcast("drone_status", _msg)
 end
 
 function handleMovementMessage (_success, _reason)
 	if _success then
-			module.sendLocationUpdate()
-		else
-			module.sendStatusMessage(_reason)
-		end
+		module.sendLocationUpdate()
+	else
+		module.sendStatusMessage(_reason)
 	end
 end
 
@@ -44,7 +43,7 @@ function handleGoToMessage (_pos, _dir)
 	goSuccess, goReason = gpsmove.goTo(_pos)
 	if goSuccess then
 		if _dir ~= nil then
-			turnSuccess, turnReason = gps.turnTo(_dir)
+			turnSuccess, turnReason = gpsmove.turnTo(_dir)
 			if not turnSuccess then
 				module.sendStatusMessage(turnReason)
 			end
@@ -118,6 +117,8 @@ function module.receive ()
 			has_block = turtle.detectDown()
 		end
 		msg.send("drone_detect", { has_block = has_block, dir = msgBody }, senderId)
+	elseif msgType == "drone_location" then
+		module.sendLocationUpdate(senderId)
 	end
 
 	-- todo: don't return anything when handling internal types?

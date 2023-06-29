@@ -1,6 +1,7 @@
 local module = {}
 
 local std = require("std")
+local msg = require("msg")
 
 function module.open (protocol)
 	-- setup rednet
@@ -15,13 +16,18 @@ function module.drones ()
 	return {}
 end
 
-function waitForResponse (_recipient, _types)
-	senderId, msgType, msgBody == nil, nil, nil
+function waitForResponse (_recipient, _types, _timeout)
+	senderId, msgType, msgBody = nil, nil, nil
 	repeat
-		senderId, msgType, msgBody = msg.receive()
+		senderId, msgType, msgBody = msg.receive(_timeout)
 	until senderId == _recipient and std.has_value(_types, msgType)
 
 	return msgType, msgBody
+end
+
+function module.getLocation (_recipient)
+	msg.send("drone_location", nil, _recipient)
+	return waitForResponse(_recipient, { "drone_location" })
 end
 
 function module.forward (_recipient)

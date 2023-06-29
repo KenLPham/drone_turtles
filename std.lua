@@ -8,3 +8,5 @@ function module.has_value (_arr, _element)
 	end
 	return false
 end
+
+return module
