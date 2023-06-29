@@ -19,6 +19,7 @@ end
 function waitForResponse (_recipient, _types, _timeout)
 	senderId, msgType, msgBody = nil, nil, nil
 	repeat
+		-- todo: abandon loop if timeout is met
 		senderId, msgType, msgBody = msg.receive(_timeout)
 	until senderId == _recipient and std.has_value(_types, msgType)
 

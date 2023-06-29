@@ -6,19 +6,21 @@ if #args == 0 then
 end
 
 local verb = args[1]
+local dirs = { "north", "west", "south", "east" }
 
 -- functions
+
+local function getLocation (_drone)
+	msgType, msgBody = controller.getLocation(_drone)
+	print(string.format("Drone %d is located at (%d, %d, %d), facing %s", drone, msgBody.pos.x, msgBody.pos.y, msgBody.pos.z, dirs[msgBody.pos.dir]))
+end
 
 local function getDrones ()
 	drones = controller.drones()
 	for i, drone in ipairs(drones) do
-		msgType, msgBody = getLocation(_drone)
-		print(string.format("%d (%d, %d, %d)", drone, msgBody.pos.x, msgBody.pos.y, msgBody.pos.z))
+		msgType, msgBody = controller.getLocation(drone)
+		print(string.format("%d (%d, %d, %d) %s", drone, msgBody.pos.x, msgBody.pos.y, msgBody.pos.z, dirs[msgBody.pos.dir]))
 	end
-end
-
-local function getLocation (_drone)
-	controller.getLocation(_drone)
 end
 
 -- main
