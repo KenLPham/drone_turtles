@@ -17,7 +17,7 @@ local function goTo (_pos)
 		if not success then
 			if result == "Movement obstructed" then
 				_, data = controller.inspect(droneId)
-				if data ~= nil and string.find(data.name, "chest") then
+				if data ~= nil and (string.find(data.name, "chest") or string.find(data.name, "turtle")) then
 					success = true
 				end
 			else
@@ -67,7 +67,8 @@ while true do
 			goTo(deliveryPos)
 			-- drop off materials
 			-- todo: check for space first
-			for _, slot in iparis(controller.findItem(droneId, itemName)) do
+			-- todo: run a loop to make sure the inv is still there while dropping
+			for _, slot in ipairs(controller.findItem(droneId, itemName)) do
 				controller.select(droneId, slot)
 				controller.drop(droneId)
 			end
