@@ -16,8 +16,8 @@ local function goTo (_pos)
 		success, result = controller.goTo(droneId, _pos)
 		if not success then
 			if result == "Movement obstructed" then
-				_, metadata = controller.detect(droneId)
-				if string.find(metadata.name, "chest") then
+				_, data = controller.inspect(droneId)
+				if data ~= nil and string.find(data.name, "chest") then
 					success = true
 				end
 			else
@@ -29,16 +29,32 @@ local function goTo (_pos)
 	until success
 end
 
+local function tryRefill ()
+	local slots = controller.findItem(droneId, itemName)
+	if #slots == 0 then
+		-- go to refill chest
+		goTo(chestPos)
+		-- loop through each slot and refill with items
+		for i=1,16 do
+			if controller.getItemCount(droneId, i) == 0 then
+				controller.suck(droneId)
+			end
+		end
+	end
+end
+
 -- main
 
 controller.open()
 
 while true do
+	tryRefill()
+
 	local senderId, msgType, msgBody = nil, nil, nil
 
 	-- wait for fetch requests
 	repeat
-		senderId, msgType, msgBody = = msg.receive()
+		senderId, msgType, msgBody = msg.receive()
 	until msgType ~= nil and string.find(msgType, "fetcher")
 
 	if msgType == "fetcher_get" then
@@ -47,12 +63,11 @@ while true do
 
 		-- check that we have the material the requestor wants
 		if requestedItem == itemName then
-			-- todo: getting on top of delivery location would be easier but no pathfinding yet so drone would just get stuck
 			-- go to delivery position
 			goTo(deliveryPos)
 			-- drop off materials
 			-- todo: check for space first
-			for _, slot in controller.findItem(droneId, itemName) do
+			for _, slot in iparis(controller.findItem(droneId, itemName)) do
 				controller.select(droneId, slot)
 				controller.drop(droneId)
 			end
