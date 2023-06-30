@@ -35,7 +35,9 @@ end
 function module.getLocation (_recipient)
 	msg.send("drone_location", nil, _recipient)
 	msgType, msgBody = waitForResponse(_recipient, { "drone_location" })
-	return msgBody.pos, msgBody.dir
+	-- ! recreate vector type from table
+	vec = vector.new(msgBody.pos.x, msgBody.pos.y, msgBody.pos.z)
+	return vec, msgBody.dir
 end
 
 -- ! most methods follow turtle API https://tweaked.cc/module/turtle.html

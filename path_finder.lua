@@ -3,14 +3,14 @@ local astar = require("astar")
 
 local args = { ... }
 if #args ~= 7 then
-	error("Usage: path_finder <drone id> <start x> <y> <z> <end x> <y> <z>")
+	error("Usage: path_finder <drone id> <x> <y> <z>")
 end
 
 local droneId = tonumber(args[1])
-local startPos = vector.new(args[2], args[3], args[4])
-local endPos = vector.new(args[5], args[6], args[7])
+local endPos = vector.new(args[2], args[3], args[4])
 
 controller.open()
+local startPos = controller.getLocation(droneId)
 
 function validPos (_pos)
 	local success, blocked, result = false, false, nil
