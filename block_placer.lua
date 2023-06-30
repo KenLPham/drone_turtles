@@ -1,4 +1,5 @@
 local controller = require("drone_controller")
+local msg = require("msg")
 
 local args = { ... }
 if #args < 2 then
@@ -20,7 +21,13 @@ local function waitForBlock(_block)
 	local slots = {}
 	repeat
 		print("waiting for", _block)
+		-- broadcast request for materials
+		local curPos = controller.getLocation(droneId)
+		-- todo: make a fetcher API
+		msg.broadcast("fetcher_get", { item = _block, pos = curPos })
+		-- check for materials
 		slots = controller.findItem(droneId, _block)
+		-- pause program to not spam network
 		os.sleep(2)
 	until #slots > 0
 	return slots
