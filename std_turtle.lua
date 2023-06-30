@@ -4,7 +4,7 @@ local module = {}
 function module.findItem (_name)
 	slots = {}
 	for i=1,16 do
-		data = turtle.getItemDetail()
+		data = turtle.getItemDetail(i)
 		if data ~= nil and string.find(data.name, _name) then
 			table.insert(slots, i)
 		end

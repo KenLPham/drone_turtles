@@ -5,7 +5,7 @@ if #args < 2 then
 	error("Usage: block_placer <drone_id> <verb>")
 end
 
-local droneId = args[1]
+local droneId = tonumber(args[1])
 local verb = args[2]
 
 local function fill (_startPos, _endPos, _block)
@@ -35,16 +35,15 @@ local function fill (_startPos, _endPos, _block)
 				end
 			end
 			-- place a block below if there is nothing there
-			if not controller.detectDown(droneId) then
-				slots = controller.findItem(droneId, _block)
-				if #slots == 0 then
-					print("need blocks")
-					repeat
-						controller.findItem(droneId, _block)
-					until #slots > 0
-				end
-				controller.placeDown(droneId)
+			slots = controller.findItem(droneId, _block)
+			if #slots == 0 then
+				print("need blocks")
+				repeat
+					controller.findItem(droneId, _block)
+				until #slots > 0
 			end
+			-- already checked for item to place so only way this would fail is if there is a solid block. which we can ignore
+			controller.placeDown(droneId)
 		end
 	end
 end
