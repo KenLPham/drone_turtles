@@ -16,9 +16,15 @@ local function fill (_startPos, _endPos, _block)
 		error(string.format("Drone could not get to start point. Reason: %s", reason))
 	end
 
-	-- go through each 
+	-- go through each
+	incr = true
 	for z=_startPos.z,_endPos.z do
-		for x=_startPos.x,_endPos.x do
+		startpos, endpos = _startPos.x, _endPos.x
+		if not incr then
+			startpos, endpos = _endPos.x, _startPos.x
+		end
+
+		for x=startpos, endpos do
 			-- todo: at some point do height
 			pos = vector.new(x, _startPos.y, z)
 			success, result = controller.goTo(droneId, pos)
@@ -44,6 +50,10 @@ local function fill (_startPos, _endPos, _block)
 			end
 			-- already checked for item to place so only way this would fail is if there is a solid block. which we can ignore
 			controller.placeDown(droneId)
+
+			if x == endpos then
+				incr = not incr
+			end
 		end
 	end
 end
