@@ -1,7 +1,7 @@
 local controller = require("drone_controller")
 
 local args = { ... }
-if #args ~= 2 then
+if #args < 2 then
 	error("Usage: block_placer <drone_id> <verb>")
 end
 
@@ -10,7 +10,7 @@ local verb = args[2]
 
 local function fill (_startPos, _endPos, _block)
 	-- go to start
-	success, reason = controller.goTo(_startPos)
+	success, reason = controller.goTo(droneId, _startPos)
 
 	if not success then
 		error(string.format("Drone could not get to start point. Reason: %s", reason))
@@ -21,29 +21,29 @@ local function fill (_startPos, _endPos, _block)
 		for x=_startPos.x,_endPos.x do
 			-- todo: at some point do height
 			pos = vector.new(x, _startPos.y, z)
-			success, result = controller.goTo(pos)
+			success, result = controller.goTo(droneId, pos)
 			-- handle failures
 			if not success then
 				if result == "Out of fuel" then
-					success, result = controller.refuel()
+					success, result = controller.refuel(droneId)
 					if not success then
 						print("Have to refuel manually")
 						repeat
-							success = controller.refuel()
+							success = controller.refuel(droneId)
 						until success
 					end
 				end
 			end
 			-- place a block below if there is nothing there
-			if not controller.detectDown() then
-				slots = controller.findItem(_block)
+			if not controller.detectDown(droneId) then
+				slots = controller.findItem(droneId, _block)
 				if #slots == 0 then
 					print("need blocks")
 					repeat
-						controller.findItem(_block)
+						controller.findItem(droneId, _block)
 					until #slots > 0
 				end
-				controller.placeDown()
+				controller.placeDown(droneId)
 			end
 		end
 	end
