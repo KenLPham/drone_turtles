@@ -27,7 +27,7 @@ end
 
 local function fill (_startPos, _endPos, _block)
 	-- go to start
-	local success, local reason = controller.goTo(droneId, _startPos)
+	local success, reason = controller.goTo(droneId, _startPos)
 
 	if not success then
 		if reason == "Out of fuel" then
@@ -41,7 +41,7 @@ local function fill (_startPos, _endPos, _block)
 	-- go through each
 	local incr = true
 	for z=_startPos.z,_endPos.z do
-		local startpos, local endpos = _startPos.x, _endPos.x
+		local startpos, endpos = _startPos.x, _endPos.x
 		if not incr then
 			startpos, endpos = _endPos.x, _startPos.x
 		end
@@ -49,11 +49,12 @@ local function fill (_startPos, _endPos, _block)
 		for x=startpos, endpos do
 			-- todo: at some point do height
 			local pos = vector.new(x, _startPos.y, z)
-			local success, result = controller.goTo(droneId, pos)
+			print("moving to", pos)
+			success, reason = controller.goTo(droneId, pos)
 			-- handle failures
 			if not success then
-				print(result)
-				if result == "Out of fuel" then
+				print(reason)
+				if reason == "Out of fuel" then
 					waitForFuel()
 				end
 			end
@@ -71,6 +72,8 @@ local function fill (_startPos, _endPos, _block)
 			end
 		end
 	end
+
+	print(reason)
 end
 
 -- main
