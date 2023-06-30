@@ -49,6 +49,7 @@ local function fill (_startPos, _endPos, _block)
 				until #slots > 0
 			end
 			-- already checked for item to place so only way this would fail is if there is a solid block. which we can ignore
+			controller.select(droneId, slots[1])
 			controller.placeDown(droneId)
 
 			if x == endpos then

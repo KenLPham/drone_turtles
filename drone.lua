@@ -287,7 +287,7 @@ function module.receive ()
 	elseif msgType == "drone_drop" then
 		handleDropMessage(senderId, msgBody.dir, msgBody.count)
 	elseif msgType == "drone_select" then
-		handleSelect(msgBody)
+		handleSelect(senderId, msgBody)
 	elseif msgType == "drone_itemcount" then
 		handleGetItemCount(senderId, msgBody)
 	elseif msgType == "drone_itemspace" then
