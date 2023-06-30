@@ -301,7 +301,7 @@ function module.receive ()
 	elseif msgType == "drone_fuel" then
 		module.sendFuelStats(senderId)
 	elseif msgType == "drone_refuel" then
-		handleRefuel(senderId, msgType)
+		handleRefuel(senderId, msgBody)
 	elseif msgType == "drone_inspect" then
 		handleInspectMessage(senderId, msgBody)
 	elseif msgType == "drone_detect" then

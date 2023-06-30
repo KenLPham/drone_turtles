@@ -8,12 +8,34 @@ end
 local droneId = tonumber(args[1])
 local verb = args[2]
 
+local function waitForFuel ()
+	local success = false
+	repeat
+		success = controller.refuel(droneId)
+		os.sleep(2)
+	until success
+end
+
+local function waitForBlock(_block)
+	local slots = 0
+	repeat
+		print("waiting for", _block)
+		slots = controller.findItem(droneId, _block)
+		os.sleep(2)
+	until #slots > 0
+end
+
 local function fill (_startPos, _endPos, _block)
 	-- go to start
 	local success, local reason = controller.goTo(droneId, _startPos)
 
 	if not success then
-		error(string.format("Drone could not get to start point. Reason: %s", reason))
+		if reason == "Out of fuel" then
+			waitForFuel()
+			success, reason = controller.goTo(droneId, _startPos)
+		else
+			error(string.format("Drone could not get to start point. Reason: %s", reason))
+		end
 	end
 
 	-- go through each
@@ -30,26 +52,15 @@ local function fill (_startPos, _endPos, _block)
 			local success, result = controller.goTo(droneId, pos)
 			-- handle failures
 			if not success then
+				print(result)
 				if result == "Out of fuel" then
-					local success, result = controller.refuel(droneId)
-					if not success then
-						print("Have to refuel manually")
-						repeat
-							success = controller.refuel(droneId)
-							os.sleep(2)
-						until success
-					end
+					waitForFuel()
 				end
 			end
 			-- place a block below if there is nothing there
 			local slots = controller.findItem(droneId, _block)
 			if #slots == 0 then
-				print("need blocks")
-				repeat
-					slots = controller.findItem(droneId, _block)
-					-- the network shuts us out if we send too many requests
-					os.sleep(2)
-				until #slots > 0
+				waitForBlock(_block)
 			end
 			-- already checked for item to place so only way this would fail is if there is a solid block. which we can ignore
 			controller.select(droneId, slots[1])
@@ -68,7 +79,6 @@ controller.open()
 
 if verb == "fill" then
 	if #args ~= 9 then
-		-- todo: optional coal and block chest pos
 		error("Usage: block_placer <drone_id> fill <block> <start_x> <start_y> <start_z> <end_x> <end_y> <end_z>")
 	end
 	block = args[3]
