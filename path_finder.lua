@@ -2,7 +2,7 @@ local controller = require("drone_controller")
 local astar = require("astar")
 
 local args = { ... }
-if #args ~= 7 then
+if #args ~= 4 then
 	error("Usage: path_finder <drone id> <x> <y> <z>")
 end
 
@@ -36,6 +36,7 @@ function validPos (_pos)
 	return not blocked
 end
 
+print("Finding path between", startPos, "and", endPos)
 path = astar.findPath(startPos, endPos, validPos)
 print(textutils.serialize(path))
 

@@ -25,7 +25,7 @@ function module.findPath (_startPos, _endPos, validFunction)
 		[posToIdx(_startPos)] = {
 			pos = _startPos,
 			gScore = 0,
-			hScore = distance(_startPos, _endPos)
+			hScore = distance(_startPos, _endPos),
 			fScore = distance(_startPos, _endPos) -- f = g + h
 		}
 	}
@@ -65,7 +65,7 @@ function module.findPath (_startPos, _endPos, validFunction)
 
 		-- for each neighbor
 		for i, vector in ipairs(cardinalDir) do
-			local neighborPos = bestNode + vector
+			local neighborPos = bestNode.pos + vector
 			local neighborIdx = posToIdx(neighborPos)
 
 			-- check if neighbor hasn't been visited and isn't an obstacle
@@ -73,8 +73,8 @@ function module.findPath (_startPos, _endPos, validFunction)
 				-- create neighbor node
 				local neighborNode = {
 					pos = neighborPos,
-					gScore = bestNode.gScore + 1
-					hScore = distance(neighborPos, endPos)
+					gScore = bestNode.gScore + 1,
+					hScore = distance(neighborPos, _endPos)
 				}
 				neighborNode.fScore = neighborNode.gScore + neighborNode.hScore
 

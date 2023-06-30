@@ -99,7 +99,7 @@ function moveToY (_y)
 				return success, reason
 			end
 		until tps.pos.y == _y
-	elseif tps.pos.y < _y then
+	elseif tps.pos.y > _y then
 		repeat
 			success, reason = tps.down()
 			-- stop loop if move can't be made and return error if there is one
