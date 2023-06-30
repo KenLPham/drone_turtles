@@ -11,15 +11,15 @@ local dirs = { "north", "west", "south", "east" }
 -- functions
 
 local function getLocation (_drone)
-	msgType, msgBody = controller.getLocation(_drone)
-	print(string.format("Drone %d is located at (%d, %d, %d), facing %s", _drone, msgBody.pos.x, msgBody.pos.y, msgBody.pos.z, dirs[msgBody.dir + 1]))
+	pos, dir = controller.getLocation(_drone)
+	print(string.format("Drone %d is located at (%d, %d, %d), facing %s", _drone, pos.x, pos.y, pos.z, dirs[dir + 1]))
 end
 
 local function getDrones ()
 	drones = controller.drones()
 	for i, drone in ipairs(drones) do
-		msgType, msgBody = controller.getLocation(drone)
-		print(string.format("%d (%d, %d, %d) %s", drone, msgBody.pos.x, msgBody.pos.y, msgBody.pos.z, dirs[msgBody.dir + 1]))
+		pos, dir = controller.getLocation(drone)
+		print(string.format("%d (%d, %d, %d) %s", drone, pos.x, pos.y, pos.z, dirs[dir + 1]))
 	end
 end
 
@@ -46,14 +46,14 @@ elseif verb == "goto" then
 	y = tonumber(args[4])
 	z = tonumber(args[5])
 
-	msgType, msgBody = controller.goTo(droneId, vector.new(x, y, z), nil)
-	if msgType == "drone_status" then
-		if msgBody == "Out of fuel" then
-			msgType, msgBody = controller.refuel(droneId)
-			if msgType == "drone_fuel" then
-				msgType, msgBody = controller.goTo(droneId, vector.new(x, y, z), nil)
+	success, result = controller.goTo(droneId, vector.new(x, y, z), nil)
+	if not success then
+		if result == "Out of fuel" then
+			success, result = controller.refuel(droneId)
+			if success then
+				success, result = controller.goTo(droneId, vector.new(x, y, z), nil)
 			end
 		end
 	end
-	print(msgType, textutils.serialize(msgBody))
+	print(success, textutils.serialize(result))
 end
