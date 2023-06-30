@@ -10,42 +10,45 @@ local verb = args[2]
 
 local function fill (_startPos, _endPos, _block)
 	-- go to start
-	success, reason = controller.goTo(droneId, _startPos)
+	local success, local reason = controller.goTo(droneId, _startPos)
 
 	if not success then
 		error(string.format("Drone could not get to start point. Reason: %s", reason))
 	end
 
 	-- go through each
-	incr = true
+	local incr = true
 	for z=_startPos.z,_endPos.z do
-		startpos, endpos = _startPos.x, _endPos.x
+		local startpos, local endpos = _startPos.x, _endPos.x
 		if not incr then
 			startpos, endpos = _endPos.x, _startPos.x
 		end
 
 		for x=startpos, endpos do
 			-- todo: at some point do height
-			pos = vector.new(x, _startPos.y, z)
-			success, result = controller.goTo(droneId, pos)
+			local pos = vector.new(x, _startPos.y, z)
+			local success, result = controller.goTo(droneId, pos)
 			-- handle failures
 			if not success then
 				if result == "Out of fuel" then
-					success, result = controller.refuel(droneId)
+					local success, result = controller.refuel(droneId)
 					if not success then
 						print("Have to refuel manually")
 						repeat
 							success = controller.refuel(droneId)
+							os.sleep(2)
 						until success
 					end
 				end
 			end
 			-- place a block below if there is nothing there
-			slots = controller.findItem(droneId, _block)
+			local slots = controller.findItem(droneId, _block)
 			if #slots == 0 then
 				print("need blocks")
 				repeat
-					controller.findItem(droneId, _block)
+					slots = controller.findItem(droneId, _block)
+					-- the network shuts us out if we send too many requests
+					os.sleep(2)
 				until #slots > 0
 			end
 			-- already checked for item to place so only way this would fail is if there is a solid block. which we can ignore
