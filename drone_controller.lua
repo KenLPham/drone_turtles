@@ -26,9 +26,16 @@ function waitForResponse (_recipient, _types, _timeout)
 	return msgType, msgBody
 end
 
+-- Get location of drone
+--
+-- @param number _recipient Drone ID
+-- @return
+--	vector Position
+--	number Direction
 function module.getLocation (_recipient)
 	msg.send("drone_location", nil, _recipient)
-	return waitForResponse(_recipient, { "drone_location" })
+	msgType, msgBody = waitForResponse(_recipient, { "drone_location" })
+	return msgBody.pos, msgBody.dir
 end
 
 function module.forward (_recipient)
@@ -51,53 +58,116 @@ function module.turnRight (_recipient)
 	return waitForResponse(_recipient, { "drone_location", "drone_status" })
 end
 
+-- Tell drone to go to position and face a specific direction if provided
+--
+-- @param number _recipient Drone ID
+-- @param vector _pos Position to go to
+-- @param number _dir Direction to face when at position (optional)
+-- @return
+--	boolean indicate if drone was able to move to position
+--	table|string table with position and direction of turtle or string with reason for failure
 function module.goTo (_recipient, _pos, _dir)
 	msg.send("drone_goto", { pos = _pos, dir = _dir }, _recipient)
-	return waitForResponse(_recipient, { "drone_location", "drone_status" })
+	msgType, msgBody = waitForResponse(_recipient, { "drone_location", "drone_status" })
+	if msgType == "drone_status" then
+		return false, msgBody
+	end
+	return true, msgBody
 end
 
+-- Get fuel level and limit of drone
+--
+-- @param number _recipient Drone ID
+-- @return
+--	number fuel level
+--	number|string fuel limit
 function module.fuelStats (_recipient)
 	msg.send("drone_fuel", nil, _recipient)
-	return waitForResponse(_recipient, { "drone_fuel" })
+	msgType, msgBody = waitForResponse(_recipient, { "drone_fuel" })
+	return msgBody.level, msgBody.limit
 end
 
+-- Try to refuel drone
+--
+-- @param number _recipient Drone ID
+-- @param number _count The maximum number of items to consume. One can pass 0 to check if an item is combustable or not. (optional)
+-- @return
+--	boolean indicate if drone was able to refuel
+--	table|string table containing fuel level and limit or string with failure reason
 function module.refuel (_recipient, _count)
 	msg.send("drone_refuel", _count, _recipient)
-	return waitForResponse(_recipient, { "drone_fuel", "drone_status" })
+	msgType, msgBody = waitForResponse(_recipient, { "drone_fuel", "drone_status" })
+	if msgType == "drone_status" then
+		return false, msgBody
+	end
+	return true, msgBody
 end
 
 function inspect (_recipient, _dir)
 	msg.send("drone_inspect", _dir, _recipient)
-	-- todo: handle drone_inspect { has_block = has_block, dir = msgBody }
-	return waitForResponse(_recipient, { "drone_inspect" })
+	msgType, msgBody = waitForResponse(_recipient, { "drone_inspect" })
+	return msgBody.hasBlock, msgBody.data
 end
 
+-- Inspect block infront of drone
+--
+-- @param number _recipient Drone ID
+-- @return
+--	boolean indicate if there is a block
+--	table block metadata
 function module.inspect(_recipient)
 	return inspect(_recipient, 0)
 end
 
+-- Inspect block above drone
+--
+-- @param number _recipient Drone ID
+-- @return
+--	boolean indicate if there is a block
+--	table block metadata
 function module.inspectUp(_recipient)
 	return inspect(_recipient, 1)
 end
 
+-- Inspect block below drone
+--
+-- @param number _recipient Drone ID
+-- @return
+--	boolean indicate if there is a block
+--	table block metadata
 function module.inspectDown(_recipient)
 	return inspect(_recipient, 2)
 end
 
 function detect (_recipient, _dir)
 	msg.send("drone_detect", _dir, _recipient)
-	-- todo: handle drone_detect { has_block = has_block, dir = msgBody }
-	return waitForResponse(_recipient, { "drone_detect" })
+	msgType, msgBody = waitForResponse(_recipient, { "drone_detect" })
+	return msgBody.hasBlock
 end
 
+-- Detect block infront of drone
+--
+-- @param number _recipient Drone ID
+-- @return
+--	boolean indicate if there is a block
 function module.detect(_recipient)
 	return detect(_recipient, 0)
 end
 
+-- Detect block above drone
+--
+-- @param number _recipient Drone ID
+-- @return
+--	boolean indicate if there is a block
 function module.detectUp(_recipient)
 	return detect(_recipient, 1)
 end
 
+-- Inspect block below drone
+--
+-- @param number _recipient Drone ID
+-- @return
+--	boolean indicate if there is a block
 function module.detectDown(_recipient)
 	return detect(_recipient, 2)
 end

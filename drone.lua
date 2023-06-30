@@ -104,25 +104,25 @@ function module.receive ()
 			module.sendStatusMessage(reason)
 		end
 	elseif msgType == "drone_inspect" then
-		has_block, data = false, nil
+		hasBlock, data = false, nil
 		if msgBody == 0 then
-			has_block, data = turtle.inspect()
+			hasBlock, data = turtle.inspect()
 		elseif msgBody == 1 then
-			has_block, data = turtle.inspectUp()
+			hasBlock, data = turtle.inspectUp()
 		elseif msgBody == 2 then
-			has_block, data = turtle.inspectDown()
+			hasBlock, data = turtle.inspectDown()
 		end
-		msg.send("drone_inspect", { has_block = has_block, data = data, dir = msgBody }, senderId)
+		msg.send("drone_inspect", { hasBlock = hasBlock, data = data, dir = msgBody }, senderId)
 	elseif msgType == "drone_detect" then
-		has_block = false
+		hasBlock = false
 		if msgBody == 0 then
-			has_block = turtle.detect()
+			hasBlock = turtle.detect()
 		elseif msgBody == 1 then
-			has_block = turtle.detectUp()
+			hasBlock = turtle.detectUp()
 		elseif msgBody == 2 then
-			has_block = turtle.detectDown()
+			hasBlock = turtle.detectDown()
 		end
-		msg.send("drone_detect", { has_block = has_block, dir = msgBody }, senderId)
+		msg.send("drone_detect", { hasBlock = hasBlock, dir = msgBody }, senderId)
 	elseif msgType == "drone_location" then
 		module.sendLocationUpdate(senderId)
 	end
