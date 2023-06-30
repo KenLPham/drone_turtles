@@ -3,6 +3,7 @@ local module = {}
 local tps = require("tps")
 local gpsmove = require("gpsmove")
 local msg = require("msg")
+local tstd = require("std_turtle")
 
 function module.calibrate (name, protocol)
 	-- setup rednet
@@ -240,6 +241,11 @@ function handleGetItemDetail (_recipient, _slot, _detailed)
 	msg.send("drone_itemdetail", details, _recipient)
 end
 
+function handleFind(_recipient, _name)
+	slots = tstd.findItem(_name)
+	msg.send("drone_find", slots, _recipient)
+end
+
 function module.sendFuelStats (_recipient)
 	body = {
 		limit = turtle.getFuelLimit(),
@@ -312,6 +318,8 @@ function module.receive ()
 		handleEquip(senderId, msgBody)
 	elseif msgType == "drone_itemdetail" then
 		handleGetItemDetail(senderId, msgBody.slot, msgBody.detailed)
+	elseif msgType == "drone_find" then
+		handleFind(senderId, msgBody)
 	end
 
 	-- todo: don't return anything when handling internal types?

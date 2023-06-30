@@ -469,4 +469,10 @@ function module.getItemDetail(_recipient, _slot, _detailed)
 	return msgBody
 end
 
+function module.findItem(_recipient, _name)
+	msg.send("drone_find", _name, _recipient)
+	msgType, msgBody = waitForResponse(_recipient, { "drone_find" })
+	return msgBody
+end
+
 return module

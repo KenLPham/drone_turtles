@@ -36,7 +36,14 @@ local function fill (_startPos, _endPos, _block)
 			end
 			-- place a block below if there is nothing there
 			if not controller.detectDown() then
-				-- todo: place
+				slots = controller.findItem(_block)
+				if #slots == 0 then
+					print("need blocks")
+					repeat
+						controller.findItem(_block)
+					until #slots > 0
+				end
+				controller.placeDown()
 			end
 		end
 	end
