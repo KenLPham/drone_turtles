@@ -9,9 +9,9 @@ function module.open (protocol)
 end
 
 function module.drones ()
-	result = rednet.lookup(msg.protocol)
-	if result ~= nil then
-		return { result }
+	result = { rednet.lookup(msg.protocol) }
+	if result[1] ~= nil then
+		return result
 	end
 	return {}
 end

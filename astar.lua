@@ -5,10 +5,10 @@ local module = {}
 local cardinalDir = {
 	vector.new(1, 0, 0),
 	vector.new(-1, 0, 0),
-	vector.new(0, 1, 0),
-	vector.new(0, -1, 0),
-	vector.new(0, 0, 1),
 	vector.new(0, 0, -1),
+	vector.new(0, 0, 1),
+	vector.new(0, -1, 0),
+	vector.new(0, 1, 0),
 }
 
 function posToIdx (_pos)
@@ -43,7 +43,7 @@ function module.findPath (_startPos, _endPos, validFunction)
 
 		-- no nodes found
 		if not bestNode then
-			return
+			return {}
 		end
 
 		-- move node to visited

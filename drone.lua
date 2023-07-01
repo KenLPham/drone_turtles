@@ -12,14 +12,17 @@ function module.calibrate (name, protocol)
 
 	-- check fuel level
 	if turtle.getFuelLevel() == 0 then
-		success, reason = turtle.refuel()
+		local success, reason = turtle.refuel()
 		if not success then
 			error(reason)
 		end
 	end
 
 	-- setup gps
-	tps.calibrate()
+	local success, reason = tps.calibrate()
+	if not success then
+		error(reason)
+	end
 end
 
 -- broadcast or send to recipient the location of turtle

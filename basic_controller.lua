@@ -58,8 +58,9 @@ elseif verb == "goto" then
 	print(success, textutils.serialize(result))
 elseif verb == "refuel" then
 	if #args ~= 2 then
-		droneId = tonumber(args[2])
+		error("Usage: basic_controller refuel <drone ID>")
 	end
-	success, result = controller.refuel()
+	droneId = tonumber(args[2])
+	success, result = controller.refuel(droneId)
 	print(textutils.serialize(result))
 end

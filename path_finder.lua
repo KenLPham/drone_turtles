@@ -27,6 +27,7 @@ function validPos (_pos)
 				end
 			else
 				-- in case of fuel, another drone will see status and refill it
+				print("out of fuel")
 				-- todo: send fetch request for fuel
 				os.sleep(2)
 			end

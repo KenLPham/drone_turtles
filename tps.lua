@@ -1,10 +1,10 @@
 local module = {
 	-- initial position and direction
 	initPos = nil,
-	initDir = 0,
+	initDir = nil,
 	-- current position and direction
 	pos = nil,
-	dir = 0
+	dir = nil
 }
 
 function isNorth ()
@@ -33,42 +33,66 @@ end
 -- this method with throw an error if the initial location isn't set
 function initDirection ()
 	if module.initPos ~= nil then
-		-- move forward
-		if not turtle.forward() then
-			error("Can't set face if turtle is blocked or has no fuel.")
-		end
-		-- get position
-		newPos = vector.new(gps.locate())
-		-- use difference with initial location to set direction
-		posDiff = module.pos - newPos
-		xDiff = posDiff.x
-		zDiff = posDiff.y
+		-- give 4 tries to set the direction
+		for i=1,4 do
+			local success, reason = turtle.forward()
+			if success then
+				-- get position
+				newPos = vector.new(gps.locate())
+				-- use difference with initial location to set direction
+				posDiff = module.pos - newPos
+				xDiff = posDiff.x
+				zDiff = posDiff.y
 
-		if xDiff > 0 then
-            -- west
-            module.initDir = 1
-        elseif xDiff < 0 then
-            -- east
-            module.initDir = 3
-        elseif zDiff > 0 then
-            -- south
-            module.initDir = 2
-        elseif zDiff < 0 then
-            -- north
-            module.initDir = 0
-        end
-		module.dir = module.initDir
-		-- move back
-		turtle.back()
+				if xDiff > 0 then
+					-- west
+					module.initDir = 1
+				elseif xDiff < 0 then
+					-- east
+					module.initDir = 3
+				elseif zDiff > 0 then
+					-- south
+					module.initDir = 2
+				elseif zDiff < 0 then
+					-- north
+					module.initDir = 0
+				end
+				module.dir = module.initDir
+				-- move back
+				turtle.back()
+			else
+				if reason == "Movement obstructed" then
+					-- try another direction
+					turtle.turnLeft()
+				elseif reason == "Out of fuel" then
+					-- this can be fixed without exiting the program
+					return false, reason
+				else
+					-- unhandled error, let the caller deal with it
+					return false, reason
+				end
+			end
+		end
+
+		-- bail out if all 4 directions were blocked
+		if module.initDir == nil then
+			error("Can't set face if turtle is blocked.")
+		end
 	else
 		error("Location must be set before direction can be found.")
 	end
+
+	return true, nil
 end
 
 -- calibrate turtle
+--
+-- @return
+--	boolean Whether the turtle was able to calibrate
+--	string|nil Reason why turtle was unable to calibrate
 function module.calibrate ()
 	initLocation()
-	initDirection()
+	return initDirection()
 end
 
 -- get current position and direction
