@@ -60,6 +60,8 @@ function initDirection ()
 				module.dir = module.initDir
 				-- move back
 				turtle.back()
+				-- end loop
+				return true, nil
 			else
 				if reason == "Movement obstructed" then
 					-- try another direction
