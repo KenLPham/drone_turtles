@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { ArrowUturnLeftIcon, ArrowUturnRightIcon, ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/solid"
-import { TurtleSocket } from '../turtle/socket_server';
 import { useTurtleContext } from '../contexts/TurtleContext';
 import { SelectTurtleForm } from '../components/SelectTurtleForm';
 import Turtle from '../turtle/turtle';
 import { SelectSlotForm } from '../components/SelectSlotForm';
+import { FindItemForm } from '../components/FindItemForm';
 
 function ControlPage() {
   const { turtles, getTurtle } = useTurtleContext()
@@ -40,8 +40,11 @@ function ControlPage() {
           </button>
         </section>
         <section>
-          <SelectSlotForm onSubmit={({ slot }) => turtle.select(slot)} />
-        </section>
+              <SelectSlotForm onSubmit={async ({ slot }) => await turtle.select(slot) } />
+            </section>
+            <section>
+              <FindItemForm turtle={turtle} />
+            </section>
             </>
           )}
       </div>

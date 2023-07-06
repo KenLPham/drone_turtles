@@ -1,6 +1,5 @@
 import { NextPage } from "next";
 import Head from "next/head";
-import { Vector } from "../turtle/socket_server";
 import { MouseEventHandler, useState } from "react";
 import _ from "lodash"
 import { AddBlockForm } from "../components/AddBlockForm";
@@ -11,10 +10,12 @@ import { PublishForm, PublishFormData } from "../components/PublishForm";
 import { useTurtleContext } from "../contexts/TurtleContext";
 import { BlueprintClient } from "../helpers/BlueprintClient";
 import Link from "next/link";
+import { Block } from "../../main/BlockDB"
 
-interface Block {
-	id: string
-	color: string
+export interface Vector {
+	x: number
+	y: number
+	z: number
 }
 
 export interface Paint {
@@ -80,25 +81,18 @@ const Blueprint: NextPage = () => {
 	}
 
 	const buildBlueprint = async ({ topLeft, bottomRight }: PublishFormData) => {
-		const tasks = await BlueprintClient.encode(canvas, w, h, topLeft, bottomRight)
+		const [success, tasks] = await BlueprintClient.encode(canvas, w, h, topLeft, bottomRight)
 		console.log(tasks)
 
 		if (turtles.length > 0) {
 			const turtle = turtles[0]
-			
-			// await Promise.all(Object.keys(tasks).map(async (key) => tasks[key].map(async (task) => {
-			// 	// move to one block above location
-			// 	task.position.y += 1
-			// 	await turtle.goTo(task.position)
-			// 	const slots = await turtle.findItem(task.block.id)
-			// 	// todo: check for no slots
-			// 	await turtle.select(slots[0])
-			// 	await turtle.placeDown()
-			// })).flat())
 
-			for (let key in Object.keys(tasks)) {
-				let blockTasks = tasks[key]
-				
+			for (const task of Object.values(tasks).flat()) {
+				task.position.y += 1
+				await turtle.goTo(task.position)
+				const slots = await turtle.findItem(task.block.id)
+				await turtle.select(slots[0])
+				await turtle.placeDown()
 			}
 		}
 	}

@@ -1,7 +1,6 @@
 import { WebSocket, WebSocketServer } from "ws";
 import { agentNames } from "../renderer/turtle/names";
 import { BrowserWindow, ipcMain } from "electron";
-import { Vector } from "../renderer/turtle/socket_server";
 
 export interface SocketResponse<T, O = any> {
 	type: "ret"
@@ -30,15 +29,28 @@ export class IPCWebSocketServer {
 			this.sockets[label] = socket
 			window.webContents.send("websocket", "connection", label)
 		})
-	
-		ipcMain.on("websocket", async (event, method, ...args) => {
-			try {
-				const result = await this[method](...args)
-				event.sender.send("websocket", true, result)
-			} catch (e: any) {
-				event.sender.send("websocket", false, e)
-			}
+
+		// setInterval(() => {
+		// 	console.log("checking for closed connections")
+		// 	for (const label of Object.keys(this.sockets)) {
+		// 		const socket = this.sockets[label]
+		// 		if (socket.readyState === socket.CLOSED) {
+		// 			console.log(label, "is closed")
+		// 			window.webContents.send("websocket", "closed", label)
+		// 		}
+		// 	}
+		// }, 5000)
+
+		ipcMain.handle("websocket", async (event, module, method, label, ...args) => {
+			const socket = this.sockets[label]
+
+			const promise = this.promiseFor(socket)
+			socket.send(IPCWebSocketServer.evalData(module, method, args))
+			return promise
 		})
+	}
+
+	public tearDown() {
 	}
 
 	private async computerLabel(socket: WebSocket): Promise<string | null> {
@@ -63,174 +75,17 @@ export class IPCWebSocketServer {
 		socket.send(IPCWebSocketServer.evalData("os", "setComputerLabel", [label]))
 	}
 
-	private async calibrate(label: string): Promise<boolean> {
-		const socket = this.sockets[label]
-		const promise = new Promise<boolean>((resolve, reject) => {
-			IPCWebSocketServer.parseMessage<boolean | string | null>(socket, (data) => {
+	private promiseFor<T = any>(socket: WebSocket): Promise<T[]> {
+		return new Promise<T[]>((resolve) => {
+			IPCWebSocketServer.parseMessage<T>(socket, (data) => {
 				if (data.type === "ret") {
-					if (data.body[0]) {
-						resolve(true)
-					} else {
-						reject(data.body[1])
+					if (!Array.isArray(data.body)) {
+						data.body = []
 					}
+					resolve(data.body)
 				}
 			})
 		})
-		socket.send(IPCWebSocketServer.evalData("tps", "calibrate"))
-		return promise
-	}
-
-	private async position(label: string): Promise<Vector> {
-		const socket = this.sockets[label]
-		const promise = new Promise<Vector | null>((resolve, reject) => {
-			IPCWebSocketServer.parseMessage<number | null>(socket, (data) => {
-				if (data.type === "ret") {
-					if (data.body.length === 3) {
-						resolve({ x: data.body[0], y: data.body[1], z: data.body[2]})
-					} else {
-						reject("Failed to find position")
-					}
-				}
-			})
-		})
-		socket.send(IPCWebSocketServer.evalData("gps", "locate"))
-		return promise
-	}
-
-	private async forward(label: string): Promise<boolean> {
-		const socket = this.sockets[label]
-		const promise = new Promise<boolean>((resolve, reject) => {
-			IPCWebSocketServer.parseMessage(socket, (data) => {
-				if (data.type === "ret") {
-					if (data.body[0]) {
-						resolve(true)
-					} else {
-						reject(data.body[1])
-					}
-				}
-			})
-		})
-		socket.send(IPCWebSocketServer.evalData("turtle", "forward"))
-		return promise
-	}
-
-	private async back(label: string): Promise<boolean> {
-		const socket = this.sockets[label]
-		const promise = new Promise<boolean>((resolve, reject) => {
-			IPCWebSocketServer.parseMessage(socket, (data) => {
-				if (data.type === "ret") {
-					if (data.body[0]) {
-						resolve(true)
-					} else {
-						reject(data.body[1])
-					}
-				}
-			})
-		})
-		socket.send(IPCWebSocketServer.evalData("turtle", "back"))
-		return promise
-	}
-
-	private async turnLeft(label: string): Promise<boolean> {
-		const socket = this.sockets[label]
-		const promise = new Promise<boolean>((resolve, reject) => {
-			IPCWebSocketServer.parseMessage(socket, (data) => {
-				if (data.type === "ret") {
-					if (data.body[0]) {
-						resolve(true)
-					} else {
-						reject(data.body[1])
-					}
-				}
-			})
-		})
-		socket.send(IPCWebSocketServer.evalData("turtle", "turnLeft"))
-		return promise
-	}
-
-	private async turnRight(label: string): Promise<boolean> {
-		const socket = this.sockets[label]
-		const promise = new Promise<boolean>((resolve, reject) => {
-			IPCWebSocketServer.parseMessage(socket, (data) => {
-				if (data.type === "ret") {
-					if (data.body[0]) {
-						resolve(true)
-					} else {
-						reject(data.body[1])
-					}
-				}
-			})
-		})
-		socket.send(IPCWebSocketServer.evalData("turtle", "turnRight"))
-		return promise
-	}
-
-	private async goTo(label: string, pos: Vector) {
-		const socket = this.sockets[label]
-		const promise = new Promise<boolean>((resolve, reject) => {
-			IPCWebSocketServer.parseMessage(socket, (data) => {
-				if (data.type === "ret") {
-					if (data.body[0]) {
-						resolve(true)
-					} else {
-						reject(data.body[1])
-					}
-				}
-			})
-		})
-		socket.send(IPCWebSocketServer.evalData("gpsmove", "goTo", [pos]))
-		return promise
-	}
-
-	private async placeDown(label: string, text?: string) {
-		const socket = this.sockets[label]
-		const promise = new Promise<boolean>((resolve, reject) => {
-			IPCWebSocketServer.parseMessage(socket, (data) => {
-				if (data.type === "ret") {
-					if (data.body[0]) {
-						resolve(true)
-					} else {
-						reject(data.body[1])
-					}
-				}
-			})
-		})
-		socket.send(IPCWebSocketServer.evalData("turtle", "placeDown", [text]))
-		return promise
-	}
-
-	private async findItem(label: string, name: string) {
-		const socket = this.sockets[label]
-		const promise = new Promise<number[]>((resolve, reject) => {
-			IPCWebSocketServer.parseMessage<string | number[]>(socket, (data) => {
-				if (data.type === "ret") {
-					if (data.body[0]) {
-						resolve(data.body[0] as number[])
-					} else {
-						reject(data.body[1])
-					}
-				}
-			})
-		})
-		socket.send(IPCWebSocketServer.evalData("tstd", "findItem", [name]))
-		return promise
-	}
-
-	private async select(label: string, slot: number) {
-		const socket = this.sockets[label]
-		const promise = new Promise<void>((resolve, reject) => {
-			IPCWebSocketServer.parseMessage<string | number[]>(socket, (data) => {
-				if (data.type === "ret") {
-					if (data.body[0]) {
-						resolve()
-					} else {
-						reject(data.body[1])
-					}
-				}
-			})
-		})
-		socket.send(IPCWebSocketServer.evalData("turtle", "select", [slot]))
-		return promise
 	}
 
 	public static evalData(module: string, method: string, args: any[] = []) {

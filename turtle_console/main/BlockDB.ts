@@ -1,5 +1,3 @@
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
 import { createHash } from "crypto";
 import { ipcMain } from "electron";
 import Store from "electron-store"
@@ -18,7 +16,6 @@ class BlockDB {
 
 	constructor() {
 		this.store = new Store({ name: "blockdb" })
-		console.log(this.store.path)
 	}
 
 	public addBlock({ id, color }: { id: string, color?: string }) {
@@ -46,7 +43,6 @@ class IPCBlockDB {
 		ipcMain.on("blockdb", (event, method, ...args) => {
 			try {
 				const result = this.db[method](...args)
-				console.log(result)
 				event.sender.send("blockdb", true, result)
 			} catch (e: any) {
 				console.error(`Failed to handle IPC request for blockdb. Reason: ${e}`)

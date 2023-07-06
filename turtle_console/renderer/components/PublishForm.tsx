@@ -1,5 +1,5 @@
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Vector } from "../turtle/socket_server";
+import { Vector } from "../pages/blueprint";
 
 interface Props {
 	onSubmit: SubmitHandler<Data>

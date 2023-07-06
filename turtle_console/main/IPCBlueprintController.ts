@@ -1,23 +1,22 @@
 import { ipcMain } from "electron";
-import { Paint } from "../renderer/pages/blueprint";
-import { Vector } from "../renderer/turtle/socket_server";
+import { Paint, Vector } from "../renderer/pages/blueprint";
 import _ from "lodash";
 
 export class IPCBlueprintController {
 	constructor () {}
 
 	public setup() {
-		ipcMain.on("blueprint", async (event, method, ...args) => {
+		ipcMain.handle("blueprint", async (event, method, ...args) => {
 			try {
 				const result = await this[method](...args)
-				event.sender.send("blueprint", true, result)
+				return [true, result]
 			} catch (e: any) {
-				event.sender.send("blueprint", false, e)
+				return [false, e]
 			}
 		})
 	}
 
-	public encode(canvas: Paint[][][], width: number, height: number, topLeft: Vector, bottomRight: Vector) {
+	public async encode(canvas: Paint[][][], width: number, height: number, topLeft: Vector, bottomRight: Vector) {
 		var layer = canvas[0]
 
 		const dx = topLeft.x - bottomRight.x

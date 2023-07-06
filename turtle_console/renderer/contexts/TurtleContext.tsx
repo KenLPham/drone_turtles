@@ -1,5 +1,4 @@
 import React, { ProviderProps, useContext, useEffect, useState } from "react"
-import { TurtleSocket } from "../turtle/socket_server"
 import Turtle from "../turtle/turtle"
 import { ipcRenderer } from "electron"
 
@@ -25,10 +24,10 @@ const TurtleContextProvider: React.FC<Props> = ({ ...props }) => {
 	}
 
 	useEffect(() => {
-		ipcRenderer?.on("websocket", async (event, ...args) => {
-			switch (args[0]) {
+		// todo: handle disconnected clients
+		ipcRenderer?.on("websocket", async (event, type, label, ...args) => {
+			switch (type) {
 				case "connection": {
-					const label = args[1]
 					const turtle = new Turtle(label)
 					setTurtles((turtles) => turtles.concat(turtle))
 			
@@ -37,6 +36,11 @@ const TurtleContextProvider: React.FC<Props> = ({ ...props }) => {
 					} catch(e: any) {
 						console.error(`${turtle.label} failed to calibrate. Reason: ${e}`)
 					}
+					break
+				}
+				case "closed": {
+					setTurtles((turtles) => turtles.filter((t) => t.label !== label))
+					break
 				}
 				default:
 					break

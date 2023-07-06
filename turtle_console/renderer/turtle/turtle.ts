@@ -1,25 +1,16 @@
 import { WebSocket } from "ws"
-import { TurtleSocket, Vector } from "./socket_server"
 import { ipcRenderer } from "electron"
+import { Vector } from "../pages/blueprint"
 
 class Turtle {
 	public label: string
 	private calibrated: boolean
 
 	public get position(): Promise<Vector> {
-		const promise = new Promise<Vector>((resolve, reject) => {
-			ipcRenderer?.on("websocket", (event, ...args) => {
-				if (args.length === 1) {
-					resolve(args[0])
-				} else {
-					reject("Failed to locate turtle")
-				}
-			})
+		return new Promise(async (resolve) => {
+			const [x, y, z] = await ipcRenderer.invoke("websocket", "gps", "locate", this.label)
+			resolve({ x, y, z })
 		})
-		// this.socket.send(TurtleSocket.evalData("gps", "locate"))
-		ipcRenderer?.send("websocket", "position")
-
-		return promise
 	}
 
 	constructor(label: string) {
@@ -28,124 +19,84 @@ class Turtle {
 	}
 
 	public async calibrate(): Promise<boolean> {
-		const promise = new Promise<boolean>((resolve, reject) => {
-			ipcRenderer?.on("websocket", (event, ...args) => {
-				if (args[0]) {
-					resolve(true)
-					this.calibrated = true
-				} else {
-					reject(args[1])
-				}
-			})
-		})
-		ipcRenderer?.send("websocket", "calibrate", this.label)
-		return promise
+		const result = await ipcRenderer.invoke("websocket", "tps", "calibrate", this.label)
+		return result[0]
 	}
 
-	public async goTo(pos: Vector) {
-		const promise = new Promise<void>((resolve, reject) => {
-			ipcRenderer?.on("websocket", (event, success, ...args) => {
-				if (success) {
-					resolve()
-				} else {
-					reject(args[0])
-				}
-			})
-		})
-		ipcRenderer?.send("websocket", "goTo", this.label, pos)
-		return promise
+	public async goTo(pos: Vector): Promise<void> {
+		const [success, reason] = await ipcRenderer.invoke("websocket", "gpsmove", "goTo", this.label, pos)
+		if (!success) {
+			console.error("Failed to goTo", pos, ". Reason:", reason)
+		}
 	}
 	
-	public async forward(): Promise<void> {
-		const promise = new Promise<void>((resolve, reject) => {
-			ipcRenderer?.on("websocket", (event, success, ...args) => {
-				if (success) {
-					resolve()
-				} else {
-					reject(args[0])
-				}
-			})
-		})
-		ipcRenderer?.send("websocket", "forward", this.label)
-		return promise
+	public async forward(): Promise<boolean> {
+		const [success, reason] = await ipcRenderer.invoke("websocket", "turtle", "forward", this.label)
+		if (!success) {
+			console.error("Failed to move forward. Reason:", reason)
+		}
+		return success
 	}
 
-	public async back(): Promise<void> {
-		const promise = new Promise<void>((resolve, reject) => {
-			ipcRenderer?.on("websocket", (event, success, ...args) => {
-				if (success) {
-					resolve()
-				} else {
-					reject(args[0])
-				}
-			})
-		})
-		ipcRenderer?.send("websocket", "back", this.label)
-		return promise
+	public async back(): Promise<boolean> {
+		const [success, reason] = await ipcRenderer.invoke("websocket", "turtle", "back", this.label)
+		if (!success) {
+			console.error("Failed to move back. Reason:", reason)
+		}
+		return success
 	}
 
-	public async turnLeft(): Promise<void> {
-		const promise = new Promise<void>((resolve, reject) => {
-			ipcRenderer?.on("websocket", (event, success, ...args) => {
-				if (success) {
-					resolve()
-				} else {
-					reject(args[0])
-				}
-			})
-		})
-		ipcRenderer?.send("websocket", "turnLeft", this.label)
-		return promise
+	public async turnLeft(): Promise<boolean> {
+		const [success, reason] = await ipcRenderer.invoke("websocket", "turtle", "turnLeft", this.label)
+		if (!success) {
+			console.error("Failed to turn left. Reason:", reason)
+		}
+		return success
 	}
 
-	public async turnRight(): Promise<void> {
-		const promise = new Promise<void>((resolve, reject) => {
-			ipcRenderer?.on("websocket", (event, success, ...args) => {
-				if (success) {
-					resolve()
-				} else {
-					reject(args[0])
-				}
-			})
-		})
-		ipcRenderer?.send("websocket", "turnRight", this.label)
-		return promise
+	public async turnRight(): Promise<boolean> {
+		const [success, reason] = await ipcRenderer.invoke("websocket", "turtle", "turnRight", this.label)
+		if (!success) {
+			console.error("Failed to turn right. Reason:", reason)
+		}
+		return success
 	}
 
-	public async placeDown(): Promise<void> {
-		const promise = new Promise<void>((resolve, reject) => {
-			ipcRenderer?.on("websocket", (event, success, ...args) => {
-				if (success) {
-					resolve()
-				} else {
-					reject(args[0])
-				}
-			})
-		})
-		ipcRenderer?.send("websocket", "placeDown", this.label)
-		return promise
+	public async place(): Promise<boolean> {
+		const [success, reason] = await ipcRenderer.invoke("websocket", "turtle", "place", this.label)
+		if (!success) {
+			console.error("Failed to place. Reason:", reason)
+		}
+		return success
+	}
+
+	public async placeDown(): Promise<boolean> {
+		const [success, reason] = await ipcRenderer.invoke("websocket", "turtle", "placeDown", this.label)
+		if (!success) {
+			console.error("Failed to place below. Reason:", reason)
+		}
+		return success
+	}
+
+	public async placeUp(): Promise<boolean> {
+		const [success, reason] = await ipcRenderer.invoke("websocket", "turtle", "placeUp", this.label)
+		if (!success) {
+			console.error("Failed to place above. Reason:", reason)
+		}
+		return success
 	}
 
 	public async findItem(name: string): Promise<number[]> {
-		const promise = new Promise<number[]>((resolve, reject) => {
-			ipcRenderer?.on("websocket", (event, success, ...args) => {
-				if (success) {
-					resolve(args[0])
-				} else {
-					reject(args[0])
-				}
-			})
-		})
-		ipcRenderer?.send("websocket", "findItem", this.label, name)
-		return promise
+		const [ slots ] = await ipcRenderer.invoke("websocket", "tstd", "findItem", this.label, name)
+		return Array.isArray(slots) ? slots : []
 	}
 
-	public async select(slot: number) {
-
-	}
-
-	public static evalData() {
-		return JSON.stringify({ })
+	public async select(slot: number): Promise<boolean> {
+		const [success, reason] = await ipcRenderer.invoke("websocket", "turtle", "select", this.label, slot)
+		if (!success) {
+			console.error("Failed to place. Reason:", reason)
+		}
+		return success
 	}
 }
 
