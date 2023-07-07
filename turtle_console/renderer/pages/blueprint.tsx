@@ -12,6 +12,10 @@ import { BlueprintClient } from "../helpers/BlueprintClient";
 import Link from "next/link";
 import { Block } from "../../main/BlockDB"
 
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export interface Vector {
 	x: number
 	y: number
@@ -24,8 +28,8 @@ export interface Paint {
 }
 
 const Blueprint: NextPage = () => {
-	const w = 5
-	const h = 5
+	const w = 52
+	const h = 54
 
 	const { turtles } = useTurtleContext()
 	const { blocks } = useBlockDB()
@@ -46,9 +50,10 @@ const Blueprint: NextPage = () => {
 	const [selectedLayer, setLayer] = useState(0)
 
 	const clickOnPoint = (x: number, y: number) => {
+		// canvas[layer][y][x]
 		setCanvas((c) => {
 			const copy = _.cloneDeep(c)
-			copy[selectedLayer][x][y].block = brushType === "erase" ? eraseColor : color
+			copy[selectedLayer][y][x].block = brushType === "erase" ? eraseColor : color
 			return copy
 		})
 	}
@@ -74,7 +79,7 @@ const Blueprint: NextPage = () => {
 	}
 
 	const removeLayer = (layer: number) => {
-		if (layer === selectedLayer) setLayer(Math.min(Math.max(selectedLayer - 1, 0), canvas.length - 1))
+		if (layer === selectedLayer) setLayer(0)
 		setCanvas((c) => {
 			return c.filter((_, i) => i !== layer)
 		})
@@ -82,18 +87,50 @@ const Blueprint: NextPage = () => {
 
 	const buildBlueprint = async ({ topLeft, bottomRight }: PublishFormData) => {
 		const [success, tasks] = await BlueprintClient.encode(canvas, w, h, topLeft, bottomRight)
-		console.log(tasks)
+		if (success) {
+			const organizedTasks = Object.values(tasks).flat().sort((a, b) => {
+				if (a.position.y > b.position.y) {
+					return 1
+				} else if (a.position.y < b.position.y) {
+					return -1
+				} else if (a.position.y == b.position.y) {
+					if (a.position.x > b.position.y) {
+						return 1
+					} else if (a.position.x < b.position.x) {
+						return -1
+					} else if (a.position.x == b.position.x) {
+						if (a.position.z > b.position.z) {
+							return 1
+						} else if (a.position.z < b.position.z) {
+							return -1
+						}
+					}
+				}
+				return 0
+			})
+			console.log(organizedTasks)
 
-		if (turtles.length > 0) {
-			const turtle = turtles[0]
+			if (turtles.length > 0) {
+				const turtle = turtles[0]
+				// todo: loop through block tasks and check for any prepared turtles.
 
-			for (const task of Object.values(tasks).flat()) {
-				task.position.y += 1
-				await turtle.goTo(task.position)
-				const slots = await turtle.findItem(task.block.id)
-				await turtle.select(slots[0])
-				await turtle.placeDown()
+				for (const task of organizedTasks) {
+					task.position.y += 1
+					await turtle.goTo(task.position)
+					var slots = await turtle.findItem(task.block.id)
+					if (slots.length === 0) {
+						while (slots.length == 0) {
+							await sleep(2000)
+							slots = await turtle.findItem(task.block.id)
+						}
+					} else {
+						await turtle.select(slots[0])
+						await turtle.placeDown()
+					}
+				}
 			}
+		} else {
+			console.error(tasks)
 		}
 	}
 
@@ -122,8 +159,8 @@ const Blueprint: NextPage = () => {
 									key={`${i},${j}`}
 									className="w-4 h-4 border-b border-r border-gray-500"
 									style={{ backgroundColor: paint.block.color }}
-									onMouseOver={() => brushActive && clickOnPoint(i, j)}
-									onClick={() => clickOnPoint(i, j)}
+									onMouseOver={() => brushActive && clickOnPoint(j, i)}
+									onClick={() => clickOnPoint(j, i)}
 								/>
 							)
 						)}

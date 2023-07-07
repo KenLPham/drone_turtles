@@ -22,7 +22,7 @@ if (isProd) {
   
   // ? setup UI
   const mainWindow = createWindow('main', {
-    width: 1280,
+    width: 1600,
     height: 900,
   });
   
@@ -31,6 +31,7 @@ if (isProd) {
   } else {
     const port = process.argv[2];
     await mainWindow.loadURL(`http://localhost:${port}/home`);
+    mainWindow.webContents.openDevTools();
   }
 
   // ? setup IPC tunnels
