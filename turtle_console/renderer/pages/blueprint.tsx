@@ -11,6 +11,8 @@ import { useTurtleContext } from "../contexts/TurtleContext";
 import { BlueprintClient } from "../helpers/BlueprintClient";
 import Link from "next/link";
 import { Block } from "../../main/BlockDB"
+import { ipcRenderer } from "electron";
+import { DialogClient } from "../helpers/DialogClient";
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -134,6 +136,26 @@ const Blueprint: NextPage = () => {
 		}
 	}
 
+	const handleExport = async () => {
+		const [ success, reasonOrPath ] = await DialogClient.saveDialog("json", {
+			width: w - 1,
+			height: h - 1,
+			canvas
+		})
+
+		// todo: display a toast to indicate a success or fail
+	}
+
+	const handleImport = async () => {
+		const [success, reasonOrData] = await DialogClient.openDialog<{ width: number, height: number, canvas: Paint[][][]}>(["json"])
+		if (success) {
+			setCanvas(reasonOrData.canvas)
+		} else {
+			// todo: show failure reason in toast
+			console.error(reasonOrData)
+		}
+	}
+
 	return (
 		<>
 			<Head>
@@ -235,6 +257,10 @@ const Blueprint: NextPage = () => {
 				</section>
 				<section className="p-2">
 					<PublishForm onSubmit={buildBlueprint} />
+					<span>
+						<button type="button" onClick={handleExport}>Export</button>
+						<button type="button" onClick={handleImport}>Import</button>
+					</span>
 				</section>
 				<Link href="/home">
 					<a className="btn-blue">Back</a>
