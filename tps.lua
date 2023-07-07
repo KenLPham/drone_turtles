@@ -42,7 +42,7 @@ function initDirection ()
 				-- use difference with initial location to set direction
 				posDiff = module.pos - newPos
 				xDiff = posDiff.x
-				zDiff = posDiff.y
+				zDiff = posDiff.z
 
 				if xDiff > 0 then
 					-- west
@@ -50,10 +50,10 @@ function initDirection ()
 				elseif xDiff < 0 then
 					-- east
 					module.initDir = 3
-				elseif zDiff > 0 then
+				elseif zDiff < 0 then
 					-- south
 					module.initDir = 2
-				elseif zDiff < 0 then
+				elseif zDiff > 0 then
 					-- north
 					module.initDir = 0
 				end
