@@ -40,6 +40,14 @@ function ControlPage() {
           </button>
         </section>
         <section>
+          <button type="button" onClick={async () => await turtle.up()} className='bg-blue-500 p-2 hover:bg-blue-600 active:bg-blue-400'>
+            <ArrowUpIcon className='h-5 w-5' />
+              </button>
+          <button type="button" onClick={async () => await turtle.down()} className='bg-blue-500 p-2 hover:bg-blue-600 active:bg-blue-400'>
+            <ArrowDownIcon className='h-5 w-5' />
+          </button>
+        </section>
+        <section>
               <SelectSlotForm onSubmit={async ({ slot }) => await turtle.select(slot) } />
             </section>
             <section>
