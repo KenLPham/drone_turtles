@@ -112,6 +112,7 @@ const Blueprint: NextPage = () => {
 			})
 			console.log(organizedTasks)
 
+			// todo: move this to a different process to allow for multiple turtles
 			if (turtles.length > 0) {
 				const turtle = turtles[0]
 				// todo: loop through block tasks and check for any prepared turtles.
@@ -127,7 +128,16 @@ const Blueprint: NextPage = () => {
 						}
 					} else {
 						await turtle.select(slots[0])
-						await turtle.placeDown()
+						// check if solid or liquid block below
+						if (await turtle.detectDown()) {
+							// replace block if it is not the same
+							if (!await turtle.compareDown()) {
+								await turtle.digDown()
+								await turtle.placeDown()
+							}
+						} else {
+							await turtle.placeDown()
+						}
 					}
 				}
 			}

@@ -138,30 +138,36 @@ class Turtle {
 
 	// ? Detect
 
-	public async detect(): Promise<[true] | [false, string]> {
-		return await ipcRenderer.invoke("websocket", "turtle", "detect", this.label)
+	public async detect(): Promise<boolean> {
+		const [ success ] = await ipcRenderer.invoke("websocket", "turtle", "detect", this.label)
+		return success
 	}
 
-	public async detectDown(): Promise<[true] | [false, string]> {
-		return await ipcRenderer.invoke("websocket", "turtle", "detectDown", this.label)
+	public async detectDown(): Promise<boolean> {
+		const [ success ] = await ipcRenderer.invoke("websocket", "turtle", "detectDown", this.label)
+		return success
 	}
 
-	public async detectUp(): Promise<[true] | [false, string]> {
-		return await ipcRenderer.invoke("websocket", "turtle", "detectUp", this.label)
+	public async detectUp(): Promise<boolean> {
+		const [ success ] = await ipcRenderer.invoke("websocket", "turtle", "detectUp", this.label)
+		return success
 	}
 
 	// ? Compare
 
-	public async compare(): Promise<[true] | [false, string]> {
-		return await ipcRenderer.invoke("websocket", "turtle", "compare", this.label)
+	public async compare(): Promise<boolean> {
+		const [ isEqual ] = await ipcRenderer.invoke("websocket", "turtle", "compare", this.label)
+		return isEqual
 	}
 
-	public async compareDown(): Promise<[true] | [false, string]> {
-		return await ipcRenderer.invoke("websocket", "turtle", "compareDown", this.label)
+	public async compareDown(): Promise<boolean> {
+		const [ isEqual ] = await ipcRenderer.invoke("websocket", "turtle", "compareDown", this.label)
+		return isEqual
 	}
 
-	public async compareUp(): Promise<[true] | [false, string]> {
-		return await ipcRenderer.invoke("websocket", "turtle", "compareUp", this.label)
+	public async compareUp(): Promise<boolean> {
+		const [ isEqual ] = await ipcRenderer.invoke("websocket", "turtle", "compareUp", this.label)
+		return isEqual
 	}
 
 	// ? Attack
